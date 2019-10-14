@@ -1,4 +1,5 @@
 """CPU functionality."""
+#functionality, classes, constructor
 
 import sys
 
