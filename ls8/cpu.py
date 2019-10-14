@@ -11,6 +11,13 @@ class CPU:
         self.ram = [0] * 256
         self.reg = [0] * 8
         self.pc = 0
+        self.operations = {
+            "LDI": 0b10000010,
+            "HLT": 0b00000001,
+            "PRN": 0b01000111,
+            "ADD": 0b10100000,
+        }
+
 
     # should accept the address to read and return the value stored there
     def ram_read(self, MAR): # MAR contains the address being read or written to
@@ -47,7 +54,7 @@ class CPU:
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
 
-        if op == "ADD":
+        if op == self.operations["ADD"]:
             self.reg[reg_a] += self.reg[reg_b]
         #elif op == "SUB": etc
         else:
@@ -75,4 +82,28 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        # needs to read memory address that's stored in register PC
+        # need to store that result in IR
+        # self.trace() #trace program execution
+        # LDI = 0b10000010 # LDI R0,8 (register immediate, set the value of a register to an integer)
+        # PRN = 0b01000111 # PRN R0 (pseudo-instruction, print numeric value stored in the given register)
+        # HLT = 0b00000001 # HLT (halt the CPU, and exit the emulator)
+
+        running = True
+        while running:
+            IR = self.ram[self.pc]
+
+            operand_a = self.ram_read(self.pc + 1)
+            operand_b = self.ram_read(self.pc + 2)
+
+            if IR == self.operations["LDI"]:
+                self.reg[operand_a] = operand_b
+                self.pc += 3
+            elif IR == self.operations["PRN"]:
+                print(self.reg[operand_a])
+                self.pc += 2
+            elif IR == self.operations["HLT"]:
+                running = False
+            else:
+                print(f"Unknown instruction: {self.ram[self.pc]}")
+                sys.exit(1)
