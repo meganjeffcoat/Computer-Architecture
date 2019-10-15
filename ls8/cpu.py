@@ -70,6 +70,9 @@ class CPU:
         if op == self.operations["ADD"]:
             self.reg[reg_a] += self.reg[reg_b]
         #elif op == "SUB": etc
+        elif op == self.operations["MUL"]:
+            mul = self.reg[reg_a] * self.reg[reg_b]
+            self.reg[reg_a] = mul
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -117,6 +120,9 @@ class CPU:
                 self.pc += 2
             elif IR == self.operations["HLT"]:
                 running = False
+            elif IR == self.operations["MUL"]:
+                self.alu(self.operations["MUL"], operand_a, operand_b)
+                self.pc += 3
             else:
                 print(f"Unknown instruction: {self.ram[self.pc]}")
                 sys.exit(1)
