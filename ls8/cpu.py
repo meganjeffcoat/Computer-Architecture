@@ -17,7 +17,10 @@ class CPU:
             "PRN": 0b01000111,
             "MUL": 0b10100010,
             "ADD": 0b10100000,
+            "PUSH": 0b01000101, 
+            "POP": 0b01000110,
         }
+        self.sp = 0xF4 # stack pointer is register R7, since starting from 0
 
 
     # should accept the address to read and return the value stored there
@@ -32,18 +35,6 @@ class CPU:
 
     def load(self, filename):
         """Load a program into memory."""
-
-        # address = 0
-
-        # with open(filename) as f:
-        #     for line in f:
-        #         comment_split = line.split("#")
-        #         num = comment_split[0].strip()
-        #         if num == '':
-        #             continue
-        #         elif (num[0] == '0') or (num[0] == '1'):
-        #             self.ram[address] = int(num[:8], 2)
-        #             address += 1
         try:
             address = 0
 
@@ -105,6 +96,8 @@ class CPU:
         # PRN = 0b01000111 # PRN R0 (pseudo-instruction, print numeric value stored in the given register)
         # HLT = 0b00000001 # HLT (halt the CPU, and exit the emulator)
 
+        print(self.ram)
+
         running = True
         while running:
             IR = self.ram[self.pc]
@@ -112,6 +105,7 @@ class CPU:
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
 
+            self.trace()
             if IR == self.operations["LDI"]:
                 self.reg[operand_a] = operand_b
                 self.pc += 3
@@ -123,6 +117,21 @@ class CPU:
             elif IR == self.operations["MUL"]:
                 self.alu(self.operations["MUL"], operand_a, operand_b)
                 self.pc += 3
+            elif IR == self.operations["PUSH"]:
+                # push the value in the given register on the stack
+                # Decrement self.sp
+                self.sp = (self.sp - 1) & 0xFF
+                #copy the value in the given register to the address pointed to by self.sp
+                self.ram[self.sp] = self.reg[operand_a]
+                self.pc +=2
+            elif IR == self.operations["POP"]:
+                # pop the value at the top of the stack into the given register
+                # copy the value from the address pointed to by self.sp to the given register
+                self.reg[operand_a] = self.ram[self.sp]
+                # increment self.sp
+                self.sp = (self.sp + 1) & 0xFF
+                self.pc += 2
             else:
                 print(f"Unknown instruction: {self.ram[self.pc]}")
                 sys.exit(1)
+        self.trace()

@@ -6,13 +6,18 @@ PRINT_NUM      = 3
 SAVE           = 4  # SAVE VALUE INTO REGISTER
 PRINT_REGISTER = 5
 ADD            = 6
+PUSH           = 7
+POP            = 8
 
 
 # 256 bytes of memory
-memory = [0] * 16
+memory = [0] * 32
 
 # Create 8 registers, 1 byte each
 register = [0] * 8
+
+SP = 7  # Stack pointer is register R7
+
 
 
 pc = 0
@@ -54,6 +59,9 @@ load_memory(sys.argv[1])
 
 
 while running:
+
+    # print(memory)
+
     # Do stuff
     command = memory[pc]
 
@@ -86,6 +94,26 @@ while running:
         reg_b = memory[pc+2]   # Get the 2nd register index from 2nd arg
         register[reg_a] += register[reg_b] # Add registers, store in reg_a
         pc += 3
+
+
+    elif command == PUSH:
+        reg = memory[pc + 1]
+        val = register[reg]
+        # Decrement the SP.
+        register[SP] -= 1
+        # Copy the value in the given register to the address pointed to by SP.
+        memory[register[SP]] = val
+        pc += 2
+
+    elif command == POP:
+        reg = memory[pc + 1]
+        val = memory[register[SP]]
+        # Copy the value from the address pointed to by SP to the given register.
+        register[reg] = val
+        # Increment SP.
+        register[SP] += 1
+        pc += 2
+
 
     else:
         print(f"Unknown instruction: {command}")
