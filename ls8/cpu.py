@@ -134,4 +134,3 @@ class CPU:
             else:
                 print(f"Unknown instruction: {self.ram[self.pc]}")
                 sys.exit(1)
-        self.trace()
