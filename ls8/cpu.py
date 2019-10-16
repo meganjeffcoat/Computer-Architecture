@@ -3,6 +3,15 @@
 
 import sys
 
+OP1 = 0b10000010 # LDI
+OP2 = 0b00000001 # HLT
+OP3 = 0b01000111 # PRN
+OP4 = 0b10100010 # MUL
+OP5 = 0b10100000 # ADD
+OP6 = 0b01000101 # PUSH
+OP7 = 0b01000110 #POP
+
+
 class CPU:
     """Main CPU class."""
 
@@ -11,15 +20,14 @@ class CPU:
         self.ram = [0] * 256
         self.reg = [0] * 8
         self.pc = 0
-        self.operations = {
-            "LDI": 0b10000010,
-            "HLT": 0b00000001,
-            "PRN": 0b01000111,
-            "MUL": 0b10100010,
-            "ADD": 0b10100000,
-            "PUSH": 0b01000101, 
-            "POP": 0b01000110,
-        }
+        self.branchtable = {}
+        self.branchtable[OP1] = self.ldi
+        self.branchtable[OP2] = self.hlt
+        self.branchtable[OP3] = self.prn
+        self.branchtable[OP4] = self.mul
+        self.branchtable[OP5] = self.add
+        self.branchtable[OP6] = self.push
+        self.branchtable[OP7] = self.pop
         self.sp = 0xF4 # stack pointer is register R7, since starting from 0
 
 
