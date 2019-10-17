@@ -93,7 +93,7 @@ class CPU:
         try:
             address = 0
 
-            with open('/Users/megan/Documents/school/CS21/projects/Computer-Architecture/ls8/examples/call.ls8') as f:
+            with open(sys.argv[1]) as f:
                 for line in f:
                     comment_split = line.split("#")
                     num = comment_split[0].strip()
@@ -192,16 +192,21 @@ class CPU:
 
             elif IR == self.operations["CALL"]:
                 #self.reg[self.sp] -= 1
-                self.sp = (self.sp - 1) & 0xFF
-                self.ram[self.reg[self.sp]] = self.sp + 2
+                # self.sp = (self.sp - 1) & 0xFF
+                # self.ram[self.reg[self.sp]] = self.sp + 2
 
+                # self.pc = self.reg[operand_a]
+                self.reg[self.sp] -= 1
+                self.ram[self.sp] = self.pc +2
                 self.pc = self.reg[operand_a]
 
             elif IR == self.operations["RET"]:
-                self.reg[4] = self.ram[self.reg[self.sp]]
-                #self.reg[self.sp] += 1
-                self.sp = (self.sp + 1) & 0xFF
-                self.pc = self.reg[4]
+                # self.reg[1] = self.ram[self.reg[self.sp]]
+                # #self.reg[self.sp] += 1
+                # self.sp = (self.sp + 1) & 0xFF
+                # self.pc = self.reg[1]
+                self.pc = self.ram[self.sp]
+                self.reg[self.sp] += 1
 
             elif IR == self.operations["ADD"]:
                 self.alu(self.operations["ADD"], operand_a, operand_b)
