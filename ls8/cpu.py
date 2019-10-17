@@ -37,8 +37,11 @@ class CPU:
             "ADD": 0b10100000,
             "PUSH": 0b01000101, 
             "POP": 0b01000110,
+            "CALL": 0b01010000,
+            "RET": 0b00010001,
         }
-        self.sp = 0xF4 # stack pointer is register R7, since starting from 0
+        self.sp = 7 # stack pointer is register R7, since starting from 0
+        self.reg[7] = 0xf4
 
     # for use with branchtable
     # def ldi(self):
@@ -85,12 +88,12 @@ class CPU:
         self.ram[MAR] = MDR
 
 
-    def load(self, filename):
+    def load(self):
         """Load a program into memory."""
         try:
             address = 0
 
-            with open(filename) as f:
+            with open('/Users/megan/Documents/school/CS21/projects/Computer-Architecture/ls8/examples/call.ls8') as f:
                 for line in f:
                     comment_split = line.split("#")
                     num = comment_split[0].strip()
@@ -150,7 +153,7 @@ class CPU:
         # PRN = 0b01000111 # PRN R0 (pseudo-instruction, print numeric value stored in the given register)
         # HLT = 0b00000001 # HLT (halt the CPU, and exit the emulator)
 
-        # print(self.ram)
+        #print(self.ram)
 
         running = True
         while running:
@@ -159,7 +162,7 @@ class CPU:
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
 
-            # self.trace()
+            #self.trace()
             if IR == self.operations["LDI"]:
                 self.reg[operand_a] = operand_b
                 self.pc += 3
@@ -168,6 +171,7 @@ class CPU:
                 self.pc += 2
             elif IR == self.operations["HLT"]:
                 running = False
+                break
             elif IR == self.operations["MUL"]:
                 self.alu(self.operations["MUL"], operand_a, operand_b)
                 self.pc += 3
@@ -185,6 +189,24 @@ class CPU:
                 # increment self.sp
                 self.sp = (self.sp + 1) & 0xFF
                 self.pc += 2
+
+            elif IR == self.operations["CALL"]:
+                #self.reg[self.sp] -= 1
+                self.sp = (self.sp - 1) & 0xFF
+                self.ram[self.reg[self.sp]] = self.sp + 2
+
+                self.pc = self.reg[operand_a]
+
+            elif IR == self.operations["RET"]:
+                self.reg[4] = self.ram[self.reg[self.sp]]
+                #self.reg[self.sp] += 1
+                self.sp = (self.sp + 1) & 0xFF
+                self.pc = self.reg[4]
+
+            elif IR == self.operations["ADD"]:
+                self.alu(self.operations["ADD"], operand_a, operand_b)
+                self.pc += 3
+
             else:
                 print(f"Unknown instruction: {self.ram[self.pc]}")
-                sys.exit(1)
+                break
